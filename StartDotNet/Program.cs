@@ -6,17 +6,45 @@ namespace StartDotNet
     public class Program
     {
 
+        private static string GetLatestVisualStudio()
+        {
+            string retValue = null;
+            Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\SxS\\VS7");
+
+            // Assuming they are in ascending order 
+            foreach (string valueName in key.GetValueNames())
+            {
+                object objKeyValue = key.GetValue(valueName);
+                
+                retValue = System.Convert.ToString(objKeyValue, System.Globalization.CultureInfo.InvariantCulture);
+            } // Next valueName 
+
+            return retValue;
+        } // End Function GetLatestVisualStudio 
+
 
         [System.STAThread()] 
         public static void Main(string[] args)
         {
-            string devenv = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.exe";
+            string dotNetLocationx_32bits = @"D:\Programme\LessPortableApps\dotnet\";
+            string dotNetLocationx_64bits = @"D:\Programme\LessPortableApps\dotnet\";
+            // string dotNetLocationx_64bits = @"D:\Programme_x64\LessPortableApps\dotnet\";
+
+
+            string basePath = GetLatestVisualStudio();
+            
+            // string workingDirectory = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE";
+            string workingDirectory = System.IO.Path.Combine(basePath, "Common7", "IDE");
+            // string devenv = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.exe";
+            string devenv = System.IO.Path.Combine(basePath, "Common7", "IDE", "devenv.exe");
             string arguments = "";
+
 
             System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(devenv, arguments);
             psi.UseShellExecute = false;
-            psi.WorkingDirectory = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE";
+            psi.WorkingDirectory = workingDirectory;
 
+            // Pass current environment variables - alter dotnet installation location 
             System.Collections.IDictionary p = System.Environment.GetEnvironmentVariables();
 
             foreach (object k in p.Keys)
@@ -34,12 +62,11 @@ namespace StartDotNet
                         {
                             if (paths[i].IndexOf("(x86)", System.StringComparison.OrdinalIgnoreCase) != -1)
                             {
-                                // paths[i] = @"D:\Programme_x86\LessPortableApps\dotnet\";
-                                paths[i] = @"D:\Programme\LessPortableApps\dotnet\";
+                                paths[i] = dotNetLocationx_32bits;
                             }
                             else
                             {
-                                paths[i] = @"D:\Programme\LessPortableApps\dotnet\";
+                                paths[i] = dotNetLocationx_64bits;
                             }
 
                         } // End if (paths[i].EndsWith(@"dotnet\", System.StringComparison.OrdinalIgnoreCase)) 
