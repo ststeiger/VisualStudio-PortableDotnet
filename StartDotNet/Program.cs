@@ -91,6 +91,43 @@ namespace StartDotNet
         } // End Sub Main 
 
 
+
+        static void LookForUninstall()
+        {
+            Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall");
+            foreach (string v in key.GetSubKeyNames())
+            {
+                System.Console.WriteLine(v);
+
+                Microsoft.Win32.RegistryKey productKey = key.OpenSubKey(v);
+                if (productKey != null)
+                {
+                    foreach (string value in productKey.GetValueNames())
+                    {
+                        System.Console.WriteLine("\tValue:" + value);
+
+                        // Check for the publisher to ensure it's our product
+                        string keyValue = System.Convert.ToString(productKey.GetValue("Publisher"));
+                        if (!keyValue.Equals("MyPublisherCompanyName", System.StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        string productName = System.Convert.ToString(productKey.GetValue("DisplayName"));
+                        if (!productName.Equals("MyProductName", System.StringComparison.OrdinalIgnoreCase))
+                            return;
+
+                        string uninstallPath = System.Convert.ToString(productKey.GetValue("InstallSource"));
+                        // Do something with this valuable information
+
+                    } // Next value 
+
+                } // End if (productKey != null) 
+
+            } // Next v 
+
+            System.Console.ReadLine();
+        } // End Sub LookForUninstall 
+
+
     } // End Class Program 
 
 
